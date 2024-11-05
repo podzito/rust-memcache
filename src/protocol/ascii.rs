@@ -131,7 +131,7 @@ impl ProtocolTrait for AsciiProtocol<Stream> {
     }
 
     fn version(&mut self) -> Result<String, MemcacheError> {
-        self.reader.get_mut().write(b"version\r\n")?;
+        let _ = self.reader.get_mut().write(b"version\r\n")?;
         self.reader.get_mut().flush()?;
         self.reader.read_line(|response| {
             let response = MemcacheError::try_from(response)?;
@@ -294,7 +294,7 @@ impl ProtocolTrait for AsciiProtocol<Stream> {
     }
 
     fn stats(&mut self) -> Result<Stats, MemcacheError> {
-        self.reader.get_mut().write(b"stats\r\n")?;
+        let _ = self.reader.get_mut().write(b"stats\r\n")?;
         self.reader.get_mut().flush()?;
 
         enum Loop {
@@ -382,7 +382,7 @@ impl AsciiProtocol<Stream> {
         }
 
         value.write_to(self.reader.get_mut())?;
-        self.reader.get_mut().write(b"\r\n")?;
+        let _ = self.reader.get_mut().write(b"\r\n")?;
         self.reader.get_mut().flush()?;
 
         if options.noreply {

@@ -212,8 +212,8 @@ fn test_cas() {
     use memcache::Client;
     use std::collections::HashMap;
     let clients = vec![
-        Client::connect("memcache://localhost:12345").unwrap(),
-        Client::connect("memcache://localhost:12345?protocol=ascii").unwrap(),
+        Client::connect("memcache://localhost:11211").unwrap(),
+        Client::connect("memcache://localhost:11211?protocol=ascii").unwrap(),
     ];
     for client in clients {
         client.flush().unwrap();

@@ -102,7 +102,7 @@ impl Client {
             let parsed = Url::parse(url.as_str())?;
             let timeout = parsed
                 .query_pairs()
-                .find(|&(ref k, ref _v)| k == "connect_timeout")
+                .find(|(k, _v)| k == "connect_timeout")
                 .and_then(|(ref _k, ref v)| v.parse::<f64>().ok())
                 .map(Duration::from_secs_f64);
             let builder = r2d2::Pool::builder().max_size(size);
@@ -148,7 +148,7 @@ impl Client {
     /// Example:
     ///
     /// ```rust
-    /// let client = memcache::Client::connect("memcache://localhost:12345").unwrap();
+    /// let client = memcache::Client::connect("memcache://localhost:11211").unwrap();
     /// client.set_read_timeout(Some(::std::time::Duration::from_secs(3))).unwrap();
     /// ```
     pub fn set_read_timeout(&self, timeout: Option<Duration>) -> Result<(), MemcacheError> {
@@ -167,7 +167,7 @@ impl Client {
     /// Example:
     ///
     /// ```rust
-    /// let client = memcache::Client::connect("memcache://localhost:12345?protocol=ascii").unwrap();
+    /// let client = memcache::Client::connect("memcache://localhost:11211?protocol=ascii").unwrap();
     /// client.set_write_timeout(Some(::std::time::Duration::from_secs(3))).unwrap();
     /// ```
     pub fn set_write_timeout(&self, timeout: Option<Duration>) -> Result<(), MemcacheError> {
@@ -186,7 +186,7 @@ impl Client {
     /// Example:
     ///
     /// ```rust
-    /// let client = memcache::Client::connect("memcache://localhost:12345").unwrap();
+    /// let client = memcache::Client::connect("memcache://localhost:11211").unwrap();
     /// client.version().unwrap();
     /// ```
     pub fn version(&self) -> Result<Vec<(String, String)>, MemcacheError> {
@@ -204,7 +204,7 @@ impl Client {
     /// Example:
     ///
     /// ```rust
-    /// let client = memcache::Client::connect("memcache://localhost:12345").unwrap();
+    /// let client = memcache::Client::connect("memcache://localhost:11211").unwrap();
     /// client.flush().unwrap();
     /// ```
     pub fn flush(&self) -> Result<(), MemcacheError> {
@@ -219,7 +219,7 @@ impl Client {
     /// Example:
     ///
     /// ```rust
-    /// let client = memcache::Client::connect("memcache://localhost:12345").unwrap();
+    /// let client = memcache::Client::connect("memcache://localhost:11211").unwrap();
     /// client.flush_with_delay(10).unwrap();
     /// ```
     pub fn flush_with_delay(&self, delay: u32) -> Result<(), MemcacheError> {
@@ -234,7 +234,7 @@ impl Client {
     /// Example:
     ///
     /// ```rust
-    /// let client = memcache::Client::connect("memcache://localhost:12345").unwrap();
+    /// let client = memcache::Client::connect("memcache://localhost:11211").unwrap();
     /// let _: Option<String> = client.get("foo").unwrap();
     /// ```
     pub fn get<V: FromMemcacheValueExt>(&self, key: &str) -> Result<Option<V>, MemcacheError> {
@@ -247,7 +247,7 @@ impl Client {
     /// Example:
     ///
     /// ```rust
-    /// let client = memcache::Client::connect("memcache://localhost:12345").unwrap();
+    /// let client = memcache::Client::connect("memcache://localhost:11211").unwrap();
     /// client.set("foo", "42", 0).unwrap();
     /// let result: std::collections::HashMap<String, String> = client.gets(&["foo", "bar", "baz"]).unwrap();
     /// assert_eq!(result.len(), 1);
@@ -263,7 +263,7 @@ impl Client {
 
         for key in keys {
             let connection_index = (self.hash_function)(key) as usize % connections_count;
-            let array = con_keys.entry(connection_index).or_insert_with(Vec::new);
+            let array = con_keys.entry(connection_index).or_default();
             array.push(key);
         }
         for (&connection_index, keys) in con_keys.iter() {
@@ -278,7 +278,7 @@ impl Client {
     /// Example:
     ///
     /// ```rust
-    /// let client = memcache::Client::connect("memcache://localhost:12345").unwrap();
+    /// let client = memcache::Client::connect("memcache://localhost:11211").unwrap();
     /// client.set("foo", "bar", 10).unwrap();
     /// # client.flush().unwrap();
     /// ```
@@ -294,7 +294,7 @@ impl Client {
     ///
     /// ```rust
     /// use std::collections::HashMap;
-    /// let client = memcache::Client::connect("memcache://localhost:12345").unwrap();
+    /// let client = memcache::Client::connect("memcache://localhost:11211").unwrap();
     /// client.set("foo", "bar", 10).unwrap();
     /// let (_, _, cas) = client.get("foo").unwrap().unwrap();
     /// let cas = cas.unwrap();
@@ -317,7 +317,7 @@ impl Client {
     /// Example:
     ///
     /// ```rust
-    /// let client = memcache::Client::connect("memcache://localhost:12345").unwrap();
+    /// let client = memcache::Client::connect("memcache://localhost:11211").unwrap();
     /// let key = "add_test";
     /// client.delete(key).unwrap();
     /// client.add(key, "bar", 100000000).unwrap();
@@ -333,7 +333,7 @@ impl Client {
     /// Example:
     ///
     /// ```rust
-    /// let client = memcache::Client::connect("memcache://localhost:12345").unwrap();
+    /// let client = memcache::Client::connect("memcache://localhost:11211").unwrap();
     /// let key = "replace_test";
     /// client.set(key, "bar", 0).unwrap();
     /// client.replace(key, "baz", 100000000).unwrap();
@@ -354,7 +354,7 @@ impl Client {
     /// Example:
     ///
     /// ```rust
-    /// let client = memcache::Client::connect("memcache://localhost:12345").unwrap();
+    /// let client = memcache::Client::connect("memcache://localhost:11211").unwrap();
     /// let key = "key_to_append";
     /// client.set(key, "hello", 0).unwrap();
     /// client.append(key, ", world!").unwrap();
@@ -372,7 +372,7 @@ impl Client {
     /// Example:
     ///
     /// ```rust
-    /// let client = memcache::Client::connect("memcache://localhost:12345").unwrap();
+    /// let client = memcache::Client::connect("memcache://localhost:11211").unwrap();
     /// let key = "key_to_append";
     /// client.set(key, "world!", 0).unwrap();
     /// client.prepend(key, "hello, ").unwrap();
@@ -390,7 +390,7 @@ impl Client {
     /// Example:
     ///
     /// ```rust
-    /// let client = memcache::Client::connect("memcache://localhost:12345").unwrap();
+    /// let client = memcache::Client::connect("memcache://localhost:11211").unwrap();
     /// client.delete("foo").unwrap();
     /// # client.flush().unwrap();
     /// ```
@@ -404,7 +404,7 @@ impl Client {
     /// Example:
     ///
     /// ```rust
-    /// let client = memcache::Client::connect("memcache://localhost:12345").unwrap();
+    /// let client = memcache::Client::connect("memcache://localhost:11211").unwrap();
     /// client.increment("counter", 42).unwrap();
     /// # client.flush().unwrap();
     /// ```
@@ -418,7 +418,7 @@ impl Client {
     /// Example:
     ///
     /// ```rust
-    /// let client = memcache::Client::connect("memcache://localhost:12345").unwrap();
+    /// let client = memcache::Client::connect("memcache://localhost:11211").unwrap();
     /// client.decrement("counter", 42).unwrap();
     /// # client.flush().unwrap();
     /// ```
@@ -432,7 +432,7 @@ impl Client {
     /// Example:
     ///
     /// ```rust
-    /// let client = memcache::Client::connect("memcache://localhost:12345").unwrap();
+    /// let client = memcache::Client::connect("memcache://localhost:11211").unwrap();
     /// assert_eq!(client.touch("not_exists_key", 12345).unwrap(), false);
     /// client.set("foo", "bar", 123).unwrap();
     /// assert_eq!(client.touch("foo", 12345).unwrap(), true);
@@ -447,7 +447,7 @@ impl Client {
     ///
     /// Example:
     /// ```rust
-    /// let client = memcache::Client::connect("memcache://localhost:12345").unwrap();
+    /// let client = memcache::Client::connect("memcache://localhost:11211").unwrap();
     /// let stats = client.stats().unwrap();
     /// ```
     pub fn stats(&self) -> Result<Vec<(String, Stats)>, MemcacheError> {
@@ -492,7 +492,7 @@ impl ClientBuilder {
     pub fn add_server<C: Connectable>(mut self, target: C) -> Result<Self, MemcacheError> {
         let targets = target.get_urls();
 
-        if targets.len() == 0 {
+        if targets.is_empty() {
             return Err(MemcacheError::BadURL("No servers specified".to_string()));
         }
 
@@ -546,7 +546,7 @@ impl ClientBuilder {
     pub fn build(self) -> Result<Client, MemcacheError> {
         let urls = self.targets;
 
-        if urls.len() == 0 {
+        if urls.is_empty() {
             return Err(MemcacheError::BadURL("No servers specified".to_string()));
         }
 
@@ -578,7 +578,7 @@ impl ClientBuilder {
 
             let connection = builder
                 .build(ConnectionManager::new(url))
-                .map_err(|e| MemcacheError::PoolError(e))?;
+                .map_err(MemcacheError::PoolError)?;
 
             connections.push(connection);
         }
@@ -595,6 +595,12 @@ impl ClientBuilder {
     }
 }
 
+impl Default for ClientBuilder {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use std::time::Duration;
@@ -602,17 +608,17 @@ mod tests {
     #[test]
     fn build_client_happy_path() {
         let client = super::Client::builder()
-            .add_server("memcache://localhost:12345")
+            .add_server("memcache://localhost:11211")
             .unwrap()
             .build()
             .unwrap();
-        assert!(client.version().unwrap()[0].1 != "");
+        assert!(!client.version().unwrap()[0].1.is_empty());
     }
 
     #[test]
     fn build_client_bad_url() {
         let client = super::Client::builder()
-            .add_server("memcache://localhost:12345:")
+            .add_server("memcache://localhost:11211:")
             .unwrap()
             .build();
         assert!(client.is_err());
@@ -631,7 +637,7 @@ mod tests {
     #[test]
     fn build_client_with_large_pool_size() {
         let client = super::Client::builder()
-            .add_server("memcache://localhost:12345")
+            .add_server("memcache://localhost:11211")
             .unwrap()
             // This is a large pool size, but it should still be valid.
             // This does make the test run very slow however.
@@ -650,7 +656,7 @@ mod tests {
         }
 
         let client = super::Client::builder()
-            .add_server("memcache://localhost:12345")
+            .add_server("memcache://localhost:11211")
             .unwrap()
             .with_hash_function(custom_hash_function)
             .build()
@@ -668,7 +674,7 @@ mod tests {
     #[test]
     fn build_client_zero_min_idle_conns() {
         let client = super::Client::builder()
-            .add_server("memcache://localhost:12345")
+            .add_server("memcache://localhost:11211")
             .unwrap()
             .with_min_idle_conns(0)
             .build();
@@ -681,7 +687,7 @@ mod tests {
             panic!("This should not be called");
         };
         let client = super::Client::builder()
-            .add_server("memcache://localhost:12345")
+            .add_server("memcache://localhost:11211")
             .unwrap()
             .with_hash_function(invalid_hash_function)
             .build();
@@ -691,7 +697,7 @@ mod tests {
     #[test]
     fn build_client_with_unsupported_protocol() {
         let client = super::Client::builder()
-            .add_server("unsupported://localhost:12345")
+            .add_server("unsupported://localhost:11211")
             .unwrap()
             .build();
         assert!(client.is_err(), "Expected error when using an unsupported protocol");
@@ -700,7 +706,7 @@ mod tests {
     #[test]
     fn build_client_with_all_optional_parameters() {
         let client = super::Client::builder()
-            .add_server("memcache://localhost:12345")
+            .add_server("memcache://localhost:11211")
             .unwrap()
             .with_max_pool_size(10)
             .with_min_idle_conns(2)
@@ -716,14 +722,14 @@ mod tests {
     #[test]
     fn unix() {
         let client = super::Client::connect("memcache:///tmp/memcached.sock").unwrap();
-        assert!(client.version().unwrap()[0].1 != "");
+        assert!(!client.version().unwrap()[0].1.is_empty());
     }
 
     #[cfg(feature = "tls")]
     #[test]
     fn ssl_noverify() {
         let client = super::Client::connect("memcache+tls://localhost:12350?verify_mode=none").unwrap();
-        assert!(client.version().unwrap()[0].1 != "");
+        assert!(!client.version().unwrap()[0].1.is_empty());
     }
 
     #[cfg(feature = "tls")]
@@ -732,27 +738,27 @@ mod tests {
         let client =
             super::Client::connect("memcache+tls://localhost:12350?ca_path=tests/assets/RUST_MEMCACHE_TEST_CERT.crt")
                 .unwrap();
-        assert!(client.version().unwrap()[0].1 != "");
+        assert!(!client.version().unwrap()[0].1.is_empty());
     }
 
     #[cfg(feature = "tls")]
     #[test]
     fn ssl_client_certs() {
         let client = super::Client::connect("memcache+tls://localhost:12351?key_path=tests/assets/client.key&cert_path=tests/assets/client.crt&ca_path=tests/assets/RUST_MEMCACHE_TEST_CERT.crt").unwrap();
-        assert!(client.version().unwrap()[0].1 != "");
+        assert!(!client.version().unwrap()[0].1.is_empty());
     }
 
     #[test]
     fn delete() {
-        let client = super::Client::connect("memcache://localhost:12345").unwrap();
+        let client = super::Client::connect("memcache://localhost:11211").unwrap();
         client.set("an_exists_key", "value", 0).unwrap();
-        assert_eq!(client.delete("an_exists_key").unwrap(), true);
-        assert_eq!(client.delete("a_not_exists_key").unwrap(), false);
+        assert!(client.delete("an_exists_key").unwrap());
+        assert!(!client.delete("a_not_exists_key").unwrap());
     }
 
     #[test]
     fn increment() {
-        let client = super::Client::connect("memcache://localhost:12345").unwrap();
+        let client = super::Client::connect("memcache://localhost:11211").unwrap();
         client.delete("counter").unwrap();
         client.set("counter", 321, 0).unwrap();
         assert_eq!(client.increment("counter", 123).unwrap(), 444);

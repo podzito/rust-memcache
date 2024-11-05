@@ -63,7 +63,7 @@ assert_eq!(answer, 42);
 ```
 !*/
 
-#![cfg_attr(feature = "cargo-clippy", allow(clippy::needless_return))]
+#![cfg_attr(feature = "clippy", allow(clippy::needless_return))]
 
 extern crate byteorder;
 extern crate enum_dispatch;
@@ -96,7 +96,7 @@ pub type Pool = r2d2::Pool<connection::ConnectionManager>;
 /// Example:
 ///
 /// ```rust
-/// let client = memcache::connect("memcache://localhost:12345").unwrap();
+/// let client = memcache::connect("memcache://localhost:11211").unwrap();
 /// ```
 pub fn connect<C: Connectable>(target: C) -> Result<Client, MemcacheError> {
     Client::connect(target)
