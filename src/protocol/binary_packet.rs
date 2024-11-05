@@ -69,7 +69,7 @@ impl PacketHeader {
         writer.write_u32::<BigEndian>(self.total_body_length)?;
         writer.write_u32::<BigEndian>(self.opaque)?;
         writer.write_u64::<BigEndian>(self.cas)?;
-        return Ok(());
+        Ok(())
     }
 
     pub fn read<R: io::Read>(reader: &mut R) -> Result<PacketHeader, MemcacheError> {
@@ -88,10 +88,11 @@ impl PacketHeader {
             opaque: reader.read_u32::<BigEndian>()?,
             cas: reader.read_u64::<BigEndian>()?,
         };
-        return Ok(header);
+        Ok(header)
     }
 }
 
+#[derive(Debug)]
 pub struct Response {
     header: PacketHeader,
     key: Vec<u8>,

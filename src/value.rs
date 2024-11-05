@@ -17,11 +17,11 @@ pub trait ToMemcacheValue<W: Write> {
 
 impl<'a, W: Write> ToMemcacheValue<W> for &'a [u8] {
     fn get_flags(&self) -> u32 {
-        return Flags::Bytes as u32;
+        Flags::Bytes as u32
     }
 
     fn get_length(&self) -> usize {
-        return self.len();
+        self.len()
     }
 
     fn write_to(&self, stream: &mut W) -> io::Result<()> {
@@ -48,7 +48,7 @@ impl<'a, W: Write> ToMemcacheValue<W> for &'a String {
 
 impl<W: Write> ToMemcacheValue<W> for String {
     fn get_flags(&self) -> u32 {
-        return Flags::Bytes as u32;
+        Flags::Bytes as u32
     }
 
     fn get_length(&self) -> usize {
@@ -65,7 +65,7 @@ impl<W: Write> ToMemcacheValue<W> for String {
 
 impl<'a, W: Write> ToMemcacheValue<W> for &'a str {
     fn get_flags(&self) -> u32 {
-        return Flags::Bytes as u32;
+        Flags::Bytes as u32
     }
 
     fn get_length(&self) -> usize {
@@ -132,25 +132,25 @@ impl<V: FromMemcacheValue> FromMemcacheValueExt for V {
 
 impl FromMemcacheValueExt for (Vec<u8>, u32, Option<u64>) {
     fn from_memcache_value(value: Vec<u8>, flags: u32, cas: Option<u64>) -> MemcacheValue<Self> {
-        return Ok((value, flags, cas));
+        Ok((value, flags, cas))
     }
 }
 
 impl FromMemcacheValue for (Vec<u8>, u32) {
     fn from_memcache_value(value: Vec<u8>, flags: u32) -> MemcacheValue<Self> {
-        return Ok((value, flags));
+        Ok((value, flags))
     }
 }
 
 impl FromMemcacheValue for Vec<u8> {
     fn from_memcache_value(value: Vec<u8>, _: u32) -> MemcacheValue<Self> {
-        return Ok(value);
+        Ok(value)
     }
 }
 
 impl FromMemcacheValue for String {
     fn from_memcache_value(value: Vec<u8>, _: u32) -> MemcacheValue<Self> {
-        return Ok(String::from_utf8(value)?);
+        Ok(String::from_utf8(value)?)
     }
 }
 

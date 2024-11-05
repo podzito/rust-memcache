@@ -20,7 +20,7 @@ pub trait Connectable {
 
 impl Connectable for (&str, u16) {
     fn get_urls(self) -> Vec<String> {
-        return vec![format!("{}:{}", self.0, self.1)];
+        vec![format!("{}:{}", self.0, self.1)]
     }
 }
 
@@ -32,25 +32,25 @@ impl Connectable for &[(&str, u16)] {
 
 impl Connectable for Url {
     fn get_urls(self) -> Vec<String> {
-        return vec![self.to_string()];
+        vec![self.to_string()]
     }
 }
 
 impl Connectable for String {
     fn get_urls(self) -> Vec<String> {
-        return vec![self];
+        vec![self]
     }
 }
 
 impl Connectable for Vec<String> {
     fn get_urls(self) -> Vec<String> {
-        return self;
+        self
     }
 }
 
 impl Connectable for &str {
     fn get_urls(self) -> Vec<String> {
-        return vec![self.to_string()];
+        vec![self.to_string()]
     }
 }
 
@@ -60,7 +60,7 @@ impl Connectable for Vec<&str> {
         for url in self {
             urls.push(url.to_string());
         }
-        return urls;
+        urls
     }
 }
 
@@ -75,7 +75,7 @@ unsafe impl Send for Client {}
 fn default_hash_function(key: &str) -> u64 {
     let mut hasher = DefaultHasher::new();
     key.hash(&mut hasher);
-    return hasher.finish();
+    hasher.finish()
 }
 
 pub(crate) fn check_key_len(key: &str) -> Result<(), MemcacheError> {
@@ -88,7 +88,7 @@ pub(crate) fn check_key_len(key: &str) -> Result<(), MemcacheError> {
 impl Client {
     #[deprecated(since = "0.10.0", note = "please use `connect` instead")]
     pub fn new<C: Connectable>(target: C) -> Result<Self, MemcacheError> {
-        return Self::connect(target);
+        Self::connect(target)
     }
 
     pub fn builder() -> ClientBuilder {
@@ -140,7 +140,7 @@ impl Client {
 
     fn get_connection(&self, key: &str) -> Pool<ConnectionManager> {
         let connections_count = self.connections.len();
-        return self.connections[(self.hash_function)(key) as usize % connections_count].clone();
+        self.connections[(self.hash_function)(key) as usize % connections_count].clone()
     }
 
     /// Set the socket read timeout for TCP connections.
@@ -211,7 +211,7 @@ impl Client {
         for connection in self.connections.iter() {
             connection.get()?.flush()?;
         }
-        return Ok(());
+        Ok(())
     }
 
     /// Flush all cache on memcached server with a delay seconds.
@@ -226,7 +226,7 @@ impl Client {
         for connection in self.connections.iter() {
             connection.get()?.flush_with_delay(delay)?;
         }
-        return Ok(());
+        Ok(())
     }
 
     /// Get a key from memcached server.
@@ -239,7 +239,7 @@ impl Client {
     /// ```
     pub fn get<V: FromMemcacheValueExt>(&self, key: &str) -> Result<Option<V>, MemcacheError> {
         check_key_len(key)?;
-        return self.get_connection(key).get()?.get(key);
+        self.get_connection(key).get()?.get(key)
     }
 
     /// Get multiple keys from memcached server. Using this function instead of calling `get` multiple times can reduce network workloads.
@@ -270,7 +270,7 @@ impl Client {
             let connection = self.connections[connection_index].clone();
             result.extend(connection.get()?.gets(keys)?);
         }
-        return Ok(result);
+        Ok(result)
     }
 
     /// Set a key with associate value into memcached server with expiration seconds.
@@ -284,7 +284,7 @@ impl Client {
     /// ```
     pub fn set<V: ToMemcacheValue<Stream>>(&self, key: &str, value: V, expiration: u32) -> Result<(), MemcacheError> {
         check_key_len(key)?;
-        return self.get_connection(key).get()?.set(key, value, expiration);
+        self.get_connection(key).get()?.set(key, value, expiration)
     }
 
     /// Compare and swap a key with the associate value into memcached server with expiration seconds.
@@ -325,7 +325,7 @@ impl Client {
     /// ```
     pub fn add<V: ToMemcacheValue<Stream>>(&self, key: &str, value: V, expiration: u32) -> Result<(), MemcacheError> {
         check_key_len(key)?;
-        return self.get_connection(key).get()?.add(key, value, expiration);
+        self.get_connection(key).get()?.add(key, value, expiration)
     }
 
     /// Replace a key with associate value into memcached server with expiration seconds.
@@ -346,7 +346,7 @@ impl Client {
         expiration: u32,
     ) -> Result<(), MemcacheError> {
         check_key_len(key)?;
-        return self.get_connection(key).get()?.replace(key, value, expiration);
+        self.get_connection(key).get()?.replace(key, value, expiration)
     }
 
     /// Append value to the key.
@@ -364,7 +364,7 @@ impl Client {
     /// ```
     pub fn append<V: ToMemcacheValue<Stream>>(&self, key: &str, value: V) -> Result<(), MemcacheError> {
         check_key_len(key)?;
-        return self.get_connection(key).get()?.append(key, value);
+        self.get_connection(key).get()?.append(key, value)
     }
 
     /// Prepend value to the key.
@@ -382,7 +382,7 @@ impl Client {
     /// ```
     pub fn prepend<V: ToMemcacheValue<Stream>>(&self, key: &str, value: V) -> Result<(), MemcacheError> {
         check_key_len(key)?;
-        return self.get_connection(key).get()?.prepend(key, value);
+        self.get_connection(key).get()?.prepend(key, value)
     }
 
     /// Delete a key from memcached server.
@@ -396,7 +396,7 @@ impl Client {
     /// ```
     pub fn delete(&self, key: &str) -> Result<bool, MemcacheError> {
         check_key_len(key)?;
-        return self.get_connection(key).get()?.delete(key);
+        self.get_connection(key).get()?.delete(key)
     }
 
     /// Increment the value with amount.
@@ -410,7 +410,7 @@ impl Client {
     /// ```
     pub fn increment(&self, key: &str, amount: u64) -> Result<u64, MemcacheError> {
         check_key_len(key)?;
-        return self.get_connection(key).get()?.increment(key, amount);
+        self.get_connection(key).get()?.increment(key, amount)
     }
 
     /// Decrement the value with amount.
@@ -424,7 +424,7 @@ impl Client {
     /// ```
     pub fn decrement(&self, key: &str, amount: u64) -> Result<u64, MemcacheError> {
         check_key_len(key)?;
-        return self.get_connection(key).get()?.decrement(key, amount);
+        self.get_connection(key).get()?.decrement(key, amount)
     }
 
     /// Set a new expiration time for a exist key.
@@ -440,7 +440,7 @@ impl Client {
     /// ```
     pub fn touch(&self, key: &str, expiration: u32) -> Result<bool, MemcacheError> {
         check_key_len(key)?;
-        return self.get_connection(key).get()?.touch(key, expiration);
+        self.get_connection(key).get()?.touch(key, expiration)
     }
 
     /// Get all servers' statistics.
@@ -458,7 +458,7 @@ impl Client {
             let url = connection.get_url();
             result.push((url, stats_info));
         }
-        return Ok(result);
+        Ok(result)
     }
 }
 

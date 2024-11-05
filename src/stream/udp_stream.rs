@@ -5,7 +5,6 @@ use std::io;
 use std::io::{Error, ErrorKind, Read, Write};
 use std::net::UdpSocket;
 use std::time::Duration;
-use std::u16;
 use url::Url;
 
 pub struct UdpStream {
@@ -19,12 +18,12 @@ impl UdpStream {
     pub fn new(addr: &Url) -> Result<Self, MemcacheError> {
         let socket = UdpSocket::bind("0.0.0.0:0")?;
         socket.connect(&*addr.socket_addrs(|| None)?)?;
-        return Ok(UdpStream {
+        Ok(UdpStream {
             socket,
             read_buf: Vec::new(),
             write_buf: Vec::new(),
             request_id: rand::random::<u16>(),
-        });
+        })
     }
 
     pub(crate) fn set_read_timeout(&self, duration: Option<Duration>) -> Result<(), MemcacheError> {

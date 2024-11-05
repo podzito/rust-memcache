@@ -12,6 +12,7 @@ use enum_dispatch::enum_dispatch;
 use std::collections::HashMap;
 
 #[enum_dispatch]
+#[allow(clippy::large_enum_variant)]
 pub enum Protocol {
     Ascii(AsciiProtocol<Stream>),
     Binary(BinaryProtocol),

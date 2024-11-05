@@ -39,7 +39,7 @@ impl ProtocolTrait for BinaryProtocol {
         request_header.write(&mut self.stream)?;
         self.stream.flush()?;
         let version = binary_packet::parse_version_response(&mut self.stream)?;
-        return Ok(version);
+        Ok(version)
     }
 
     fn flush(&mut self) -> Result<(), MemcacheError> {
@@ -78,7 +78,7 @@ impl ProtocolTrait for BinaryProtocol {
         request_header.write(&mut self.stream)?;
         self.stream.write_all(key.as_bytes())?;
         self.stream.flush()?;
-        return binary_packet::parse_get_response(&mut self.stream);
+        binary_packet::parse_get_response(&mut self.stream)
     }
 
     fn gets<V: FromMemcacheValueExt>(&mut self, keys: &[&str]) -> Result<HashMap<String, V>, MemcacheError> {
@@ -99,7 +99,7 @@ impl ProtocolTrait for BinaryProtocol {
             ..Default::default()
         };
         noop_request_header.write(&mut self.stream)?;
-        return binary_packet::parse_gets_response(&mut self.stream, keys.len());
+        binary_packet::parse_gets_response(&mut self.stream, keys.len())
     }
 
     fn cas<V: ToMemcacheValue<Stream>>(
@@ -114,11 +114,11 @@ impl ProtocolTrait for BinaryProtocol {
     }
 
     fn set<V: ToMemcacheValue<Stream>>(&mut self, key: &str, value: V, expiration: u32) -> Result<(), MemcacheError> {
-        return self.store(Opcode::Set, key, value, expiration, None);
+        self.store(Opcode::Set, key, value, expiration, None)
     }
 
     fn add<V: ToMemcacheValue<Stream>>(&mut self, key: &str, value: V, expiration: u32) -> Result<(), MemcacheError> {
-        return self.store(Opcode::Add, key, value, expiration, None);
+        self.store(Opcode::Add, key, value, expiration, None)
     }
 
     fn replace<V: ToMemcacheValue<Stream>>(
@@ -127,7 +127,7 @@ impl ProtocolTrait for BinaryProtocol {
         value: V,
         expiration: u32,
     ) -> Result<(), MemcacheError> {
-        return self.store(Opcode::Replace, key, value, expiration, None);
+        self.store(Opcode::Replace, key, value, expiration, None)
     }
 
     fn append<V: ToMemcacheValue<Stream>>(&mut self, key: &str, value: V) -> Result<(), MemcacheError> {
@@ -171,7 +171,7 @@ impl ProtocolTrait for BinaryProtocol {
         request_header.write(&mut self.stream)?;
         self.stream.write_all(key.as_bytes())?;
         self.stream.flush()?;
-        return binary_packet::parse_delete_response(&mut self.stream);
+        binary_packet::parse_delete_response(&mut self.stream)
     }
 
     fn increment(&mut self, key: &str, amount: u64) -> Result<u64, MemcacheError> {
@@ -194,7 +194,7 @@ impl ProtocolTrait for BinaryProtocol {
         self.stream.write_u32::<BigEndian>(extras.expiration)?;
         self.stream.write_all(key.as_bytes())?;
         self.stream.flush()?;
-        return binary_packet::parse_counter_response(&mut self.stream);
+        binary_packet::parse_counter_response(&mut self.stream)
     }
 
     fn decrement(&mut self, key: &str, amount: u64) -> Result<u64, MemcacheError> {
@@ -217,7 +217,7 @@ impl ProtocolTrait for BinaryProtocol {
         self.stream.write_u32::<BigEndian>(extras.expiration)?;
         self.stream.write_all(key.as_bytes())?;
         self.stream.flush()?;
-        return binary_packet::parse_counter_response(&mut self.stream);
+        binary_packet::parse_counter_response(&mut self.stream)
     }
 
     fn touch(&mut self, key: &str, expiration: u32) -> Result<bool, MemcacheError> {
@@ -233,7 +233,7 @@ impl ProtocolTrait for BinaryProtocol {
         self.stream.write_u32::<BigEndian>(expiration)?;
         self.stream.write_all(key.as_bytes())?;
         self.stream.flush()?;
-        return binary_packet::parse_touch_response(&mut self.stream);
+        binary_packet::parse_touch_response(&mut self.stream)
     }
 
     fn stats(&mut self) -> Result<Stats, MemcacheError> {
@@ -245,7 +245,7 @@ impl ProtocolTrait for BinaryProtocol {
         request_header.write(&mut self.stream)?;
         self.stream.flush()?;
         let stats_info = binary_packet::parse_stats_response(&mut self.stream)?;
-        return Ok(stats_info);
+        Ok(stats_info)
     }
 }
 

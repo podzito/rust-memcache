@@ -10,6 +10,7 @@ use crate::value::{FromMemcacheValueExt, ToMemcacheValue};
 use std::borrow::Cow;
 
 #[derive(Default)]
+#[allow(dead_code)]
 pub struct Options {
     pub noreply: bool,
     pub exptime: u32,
@@ -27,7 +28,7 @@ enum StoreCommand {
     Prepend,
 }
 
-const END: &'static str = "END\r\n";
+const END: &str = "END\r\n";
 
 impl fmt::Display for StoreCommand {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -50,10 +51,8 @@ struct CappedLineReader<C> {
 
 fn get_line(buf: &[u8]) -> Option<usize> {
     for (i, r) in buf.iter().enumerate() {
-        if *r == b'\r' {
-            if buf.get(i + 1) == Some(&b'\n') {
-                return Some(i + 2);
-            }
+        if *r == b'\r' && buf.get(i + 1) == Some(&b'\n') {
+            return Some(i + 2);
         }
     }
     None
@@ -77,7 +76,7 @@ impl<C: Read> CappedLineReader<C> {
         let (to_fill, rest) = buf.split_at_mut(min);
         to_fill.copy_from_slice(&self.buf[..min]);
         self.consume(min);
-        if rest.len() != 0 {
+        if !rest.is_empty() {
             self.inner.read_exact(&mut rest[..])?;
         }
         Ok(())
@@ -98,7 +97,7 @@ impl<C: Read> CappedLineReader<C> {
         }
         loop {
             let (_filled, buf) = self.buf.split_at_mut(self.filled);
-            if buf.len() == 0 {
+            if buf.is_empty() {
                 return Err(ClientError::Error(Cow::Borrowed("Ascii protocol response too long")))?;
             }
             let read = self.inner.read(&mut buf[..])?;
@@ -127,7 +126,7 @@ pub struct AsciiProtocol<C: Read + Write + Sized> {
 
 impl ProtocolTrait for AsciiProtocol<Stream> {
     fn auth(&mut self, username: &str, password: &str) -> Result<(), MemcacheError> {
-        return self.set("auth", format!("{} {}", username, password), 0);
+        self.set("auth", format!("{} {}", username, password), 0)
     }
 
     fn version(&mut self) -> Result<String, MemcacheError> {
@@ -348,12 +347,10 @@ impl AsciiProtocol<Stream> {
         value: V,
         options: &Options,
     ) -> Result<bool, MemcacheError> {
-        if command == StoreCommand::Cas {
-            if options.cas.is_none() {
-                Err(ClientError::Error(Cow::Borrowed(
-                    "cas_id should be present when using cas command",
-                )))?;
-            }
+        if command == StoreCommand::Cas && options.cas.is_none() {
+            Err(ClientError::Error(Cow::Borrowed(
+                "cas_id should be present when using cas command",
+            )))?;
         }
         let noreply = if options.noreply { " noreply" } else { "" };
         if options.cas.is_some() {
@@ -481,7 +478,7 @@ mod tests {
             match self.reads.pop_front() {
                 Some(range) => {
                     let range = &self.data[range];
-                    (&mut buf[0..range.len()]).copy_from_slice(&range);
+                    buf[0..range.len()].copy_from_slice(range);
                     Ok(range.len())
                 }
                 None => Err(std::io::ErrorKind::WouldBlock.into()),
